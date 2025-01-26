@@ -1,0 +1,107 @@
+@if (userProjects.length === 0) {
+<div class="d-grid gap-2 col-xl-4 col-lg-6 col-md-8 mx-auto pt-5 px-3">
+    <div class="accordion shadow-sm" id="accordionExample">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                    aria-expanded="true" aria-controls="collapseOne">
+                    Join Existing Log
+                </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="logId" class="form-label">Log ID</label>
+                            <input type="text" class="form-control" id="logId" aria-describedby="logIdHelp">
+                            <div id="logIdHelp" class="form-text">Enter the ID of the log you want to join.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="logPassword" class="form-label">Log Password</label>
+                            <input type="password" class="form-control" id="logPassword"
+                                aria-describedby="logPasswordHelp">
+                            <div id="logPasswordHelp" class="form-text">Enter the password of the log you want to join.
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-dark">Join Log</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    Create New Log
+                </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="logName" class="form-label">Log Name</label>
+                            <input type="text" class="form-control" id="logName" aria-describedby="logNameHelp">
+                            <div id="logNameHelp" class="form-text">Enter the name of the log you want to create.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="logPassword" class="form-label">Log Password</label>
+                            <input type="password" class="form-control" id="logPassword"
+                                aria-describedby="logPasswordHelp">
+                            <div id="logPasswordHelp" class="form-text">Enter the password of the log you want to
+                                create.</div>
+                        </div>
+                        <button type="submit" class="btn btn-dark">Create Log</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}@else {
+<ul class="nav nav-tabs">
+    @for (p of userProjects; track p.projectID) {
+    <li class="nav-item">
+        <a class="nav-link" [routerLink]="p.projectID" [ngClass]="{'active': $first}">
+            {{  p.projectName }}
+        </a>
+    </li>
+    }
+    <li class="nav-item">
+        <a class="nav-link">
+            <i class="fa-solid fa-plus"></i>
+        </a>
+    </li>
+    <!-- <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="#">Active</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#">Link</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#">Link</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+    </li> -->
+</ul>
+}
+
+<style>
+    .accordion {
+        --bs-accordion-btn-color: var(--bs-light);
+        --bs-accordion-btn-bg: var(--bs-secondary-color);
+        --bs-accordion-active-color: var(--bs-light);
+        --bs-accordion-active-bg: var(--bs-dark);
+        /* --bs-accordion-border-color: red; */
+    }
+
+    /* Change the color of the collapsed arrow */
+    .accordion-button::after {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-plus' viewBox='0 0 16 16'%3E%3Cpath d='M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z'/%3E%3C/svg%3E");
+        transition: all 0.5s;
+    }
+
+    .accordion-button:not(.collapsed)::after {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-dash' viewBox='0 0 16 16'%3E%3Cpath d='M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z'/%3E%3C/svg%3E");
+    }
+</style>
