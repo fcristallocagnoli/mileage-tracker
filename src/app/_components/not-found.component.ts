@@ -18,7 +18,6 @@ import { RouterLink } from '@angular/router';
         </div>
     </div>
     `,
-    standalone: true,
     imports: [RouterLink]
 })
 export class NotFoundComponent {
