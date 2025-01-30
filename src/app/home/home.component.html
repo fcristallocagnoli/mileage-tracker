@@ -1,0 +1,128 @@
+<main>
+    <section class="container my-5 px-4">
+        <div class="row row-gap-5">
+            <div class="col-lg-6 d-flex align-items-center">
+                <div class="flex flex-col items-center">
+                    <div class="my-2">
+                        <h1 class="font-bold" style="font-size: 3.125rem;">Gestiona tus rutas con Mileage Tracker</h1>
+                        <p class="mx-auto fs-5">Optimiza tus viajes, ahorra combustible y controla tus gastos.</p>
+                    </div>
+                    <div class="d-flex justify-content-start column-gap-4">
+                        <button class="btn btn-dark px-4 py-2">
+                            Comenzar gratis
+                        </button>
+                        <button class="btn btn-light border px-4 py-2">
+                            Saber más
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card mx-auto">
+                    <div class="card-body p-4">
+                        <h5 class="card-title fw-bold">Iniciar sesión</h5>
+                        <h6 class="card-subtitle mb-2 text-body-secondary">Accede a tu cuenta de Mileage Tracker</h6>
+                        <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
+                            <div class="my-3">
+                                <label class="form-label">Correo Electrónico</label>
+                                <input type="text" formControlName="email" class="form-control"
+                                    placeholder="name@example.com">
+                            </div>
+                            <div class="my-3">
+                                <label class="form-label">Contraseña</label>
+                                <input type="password" formControlName="password" class="form-control">
+                            </div>
+                            <div class="d-grid gap-2 mb-2 my-4">
+                                <button class="btn btn-dark" type="submit" [disabled]="submitting">
+                                    <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
+                                    Iniciar sesión
+                                </button>
+                            </div>
+                            <div class="separator my-2" style="font-size: 12px">
+                                <span class="text-body-secondary p-1">O CONTINÚA CON</span>
+                            </div>
+                            <div class="d-grid gap-2 mb-2">
+                                <button class="btn btn-light border" type="button" (click)="onClickGoogle()">
+                                    <svg class="" aria-hidden="true" focusable="false" data-prefix="fab"
+                                        data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 536 560" width="16" height="16">
+                                        <path fill="currentColor"
+                                            d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z">
+                                        </path>
+                                    </svg>
+                                    <span class="mx-1">
+                                        Iniciar sesión con Google
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container-fluid p-4" style="background-color: #f3f4f6;">
+        <h2 class="fw-bold text-center mb-5" style="font-size: 2.25rem;">
+            Características principales
+        </h2>
+        <div class="row my-3 mx-4 row-gap-3">
+            <div class="col-md-6 col-lg-4 px-4">
+                <div class="card shadow-sm mb-3 p-2">
+                    <div class="card-body">
+                        <h1 class="card-title"><i class="lni lni-briefcase-2"></i></h1>
+                        <h5 class="card-title fw-bold">Únete o crea un proyecto</h5>
+                        <p class="card-text">Comparte proyectos con varias personas y controla los gastos de cada uno.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 px-4">
+                <div class="card shadow-sm mb-3 p-2">
+                    <div class="card-body">
+                        <h1 class="card-title"><i class="lni lni-map-marker-1"></i></h1>
+                        <h5 class="card-title fw-bold">Introduce trayectos</h5>
+                        <p class="card-text">Registra tus rutas y desplazamientos de forma rápida y sencilla.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 px-4">
+                <div class="card shadow-sm mb-3 p-2">
+                    <div class="card-body">
+                        <h1 class="card-title"><i class="lni lni-bar-chart-4"></i></h1>
+                        <h5 class="card-title fw-bold">Visualiza los datos</h5>
+                        <p class="card-text">Obtén gráficos y estadísticas para analizar tus desplazamientos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<footer class="container d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+    <p class="col-md-4 mb-0 text-body-secondary">&copy; 2025 Mileage Tracker</p>
+    <ul class="nav col-md-4 justify-content-end">
+        <li class="nav-item">
+            <a href="#" class="nav-link px-2 text-body-secondary">Home</a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link px-2 text-body-secondary">Features</a>
+        </li>
+        <li class="nav-item">
+            <a href="mailto:fcristallocagnoli@gmail.com" class="nav-link px-2 text-body-secondary">
+                Contact
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="https://github.com/fcristallocagnoli/Mileage-Tracker" target="_blank"
+                class="nav-link px-2 text-body-secondary">
+                Github
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link disabled px-2 text-body-secondary">FAQs</a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link disabled px-2 text-body-secondary">About</a>
+        </li>
+    </ul>
+</footer>
