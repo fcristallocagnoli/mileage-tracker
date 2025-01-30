@@ -9,6 +9,10 @@ import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import Aura from '@primeng/themes/aura';
+import { providePrimeNG } from 'primeng/config';
+
 initializeApp(environment.firebaseConfig);
 
 export const appConfig: ApplicationConfig = {
@@ -17,6 +21,12 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(
       AngularFireModule.initializeApp(environment.firebaseConfig),
       AngularFirestoreModule
-    )
+    ),
+    provideAnimationsAsync(),
+    providePrimeNG({
+      theme: {
+        preset: Aura
+      }
+    })
   ]
 };
