@@ -1,25 +1,31 @@
 import { Injectable } from '@angular/core';
 
-import { createUserWithEmailAndPassword, getAuth, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, signOut } from 'firebase/auth';
-import { User } from '../interfaces/user.interface';
+import { browserSessionPersistence, createUserWithEmailAndPassword, getAuth, GoogleAuthProvider, setPersistence, signInWithEmailAndPassword, signInWithPopup, signOut } from 'firebase/auth';
+import { UserToLogIn, UserToRegister } from '../interfaces/user.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  constructor() { }
+  constructor() {
+    setPersistence(this.getAuth(), browserSessionPersistence);
+  }
+
+  public get accountValue() {
+    return this.getAuth().currentUser;
+  }
 
   getAuth() {
     return getAuth();
   }
 
-  register(user: User) {
+  register(user: UserToRegister) {
     return createUserWithEmailAndPassword(getAuth(), user.email, user.password);
   }
 
-  logIn(use: User) {
-    return signInWithEmailAndPassword(getAuth(), use.email, use.password);
+  logIn(user: UserToLogIn) {
+    return signInWithEmailAndPassword(getAuth(), user.email, user.password);
   }
 
   logInGoogle() {
