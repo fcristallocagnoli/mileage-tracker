@@ -1,0 +1,135 @@
+<div class="row mt-4">
+    <!-- Mitad izquierda de la pantalla -->
+    <div class="col-md-6 mb-3 mb-sm-0 pe-sm-0">
+        <!-- Flex vertical -->
+        <div class="d-flex flex-column m-5 mb-2 mt-0 row-gap-4">
+            <!-- Flex horizontal -->
+            <div class="friki d-flex column-gap-4 flex-lg-row row-gap-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-title fs-5 fw-bold">
+                            {{ project.projectName }}
+                        </div>
+                        <p class="card-text">{{ project.projectDescription }}</p>
+                        <button class="btn btn-sm btn-dark" (click)="copyToClipboard(project.projectId)">
+                            @if (!isCopied) {
+                            <i class="fa-regular fa-copy pe-1"></i>
+                            Copiar ID del Proyecto
+                            }@else {
+                            <i class="fa-solid fa-check pe-1"></i>
+                            ID Copiado!
+                            }
+                        </button>
+                    </div>
+                </div>
+                <div class="card flex-fill">
+                    <div class="card-body">
+                        <div class="card-title fs-5 fw-bold">
+                            Último viaje
+                        </div>
+                        <p class="card-text">
+                            {{ lastTrip?.tripStartKm }} - {{ lastTrip?.tripEndKm }} km <br>
+                            Realizado por: {{ lastTrip?.tripUserName }} <br>
+                            El dia {{ lastTrip?.tripDate | date: 'mediumDate' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div id="friki" class="d-flex column-gap-4 flex-lg-row flex-sm-column-reverse row-gap-4">
+                <!-- Flex vertical -->
+                <div class="d-flex flex-column row-gap-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">Total de Kilometros Acumulados</h5>
+                            <h6 class="form-text">Suma de todos los kilometros recorridos en el proyecto</h6>
+                            <p class="fw-bold fs-1">{{ project.projectTotalKms }} km</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">Periodo del Proyecto</h5>
+                            <h6 class="form-text">Fechas de inicio y fin del proyecto</h6>
+                            <p class="card-text">
+                                Inicio: {{ project.projectStartDate | date: 'longDate' }} <br>
+                                Fin: {{ project.projectEndDate | date: 'longDate' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Flex vertical FIN -->
+                <div class="flex-fill">
+                    <h5 class="fw-bold">Introduce los kilometros</h5>
+                    <form class="d-flex flex-column" [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
+                        <div class="mb-3">
+                            <label for="logFecha" class="form-label">Fecha</label>
+                            <input type="date" class="form-control" id="logFecha" formControlName="tripDate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="logKmIniciales" class="form-label">Kilometros Iniciales</label>
+                            <input type="text" class="form-control" id="logKmIniciales" formControlName="tripStartKm" [placeholder]="getLastKms()">
+                        </div>
+                        <div class="mb-3">
+                            <label for="logKmFinales" class="form-label">Kilometros Finales</label>
+                            <input type="text" class="form-control" id="logKmFinales" formControlName="tripEndKm">
+                        </div>
+                        <button type="submit" class="btn btn-dark">
+                            Introducir
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <!-- Flex horizontal FIN -->
+            <div class="card flex-fill">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Porcentaje de Uso</h5>
+                    <h6 class="form-text">Kilometros recorridos por usuario</h6>
+                    @for (user of projectUsers; track user.userId) {
+                    <div class="card-text pb-2 d-flex justify-content-between"
+                        [ngClass]="{ 'pb-2': $first, 'py-2': !$first }">
+                        <span>{{ user.userDisplayName }}</span>
+                        <span>{{ calculateUsage(user.userId) }}%</span>
+                    </div>
+                    <div class="progress" role="progressbar" aria-label="Basic example"
+                        [attr.aria-valuenow]="calculateUsage(user)" aria-valuemin="0" aria-valuemax="100"
+                        style="height: 5px;">
+                        <div class="progress-bar bg-dark" [style.width]="calculateUsage(user.userId) + '%'"></div>
+                    </div>
+                    <div class="form-text">
+                        {{ getKmForUser(user.userId) }} km recorridos en 19 dias
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <!-- Flex vertical FIN -->
+    </div>
+    <!-- Mitad derecha de la pantalla -->
+    <!-- Grafica -->
+    <div class="col-md-6 ps-sm-0">
+        <div class="d-flex flex-column m-5 mt-0 ms-md-0 row-gap-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Kilometros Recorridos por Día</h5>
+                    <h6 class="form-text">Gráfica de líneas mostrando los kilómetros recorridos por cada usuario</h6>
+                    <p-chart type="line" [data]="myData" [options]="options" class="h-[30rem]" height="340" />
+                </div>
+            </div>
+            <button class="btn btn-dark">Leave Project</button>
+        </div>
+    </div>
+</div>
+<style>
+    @media (max-width: 768px) {
+        .friki {
+            flex-direction: column;
+        }
+        #friki {
+            flex-direction: column;
+            flex-flow: column-reverse;
+        }
+
+        /* #grafica {
+            display: none;
+        } */
+    }
+</style>
