@@ -1,6 +1,6 @@
 <div class="app-container">
   <!-- main nav -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top border-bottom">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
     <div class="container-fluid px-4">
       <!-- Home -->
       <a routerLink="/" routerLinkActive="active" class="navbar-brand">
@@ -25,14 +25,24 @@
             <a routerLink="/" routerLinkActive="active" class="nav-item nav-link px-3">
               Home
             </a>
-            <!-- Funcionamiento -->
-            <a routerLink="/" routerLinkActive="active" class="nav-item nav-link px-3">
-              Funcionamiento
+            <!-- Proyectos -->
+            <a routerLink="/projects" routerLinkActive="active" class="nav-item nav-link px-3"
+              [class.disabled]="!authService.isAuthenticated()">
+              Proyecto
             </a>
-            <!-- Funcionamiento -->
-            <a routerLink="/projects" routerLinkActive="active" class="nav-item nav-link px-3">
-              Proyectos
-            </a>
+            <hr>
+            @if (authService.isAuthenticated()) {
+            <div class="dropdown d-flex align-items-center ps-3">
+              <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                <img [src]="getUserPhoto()" alt="" width="28" height="28" class="rounded-circle me-2">
+                <strong>{{ getUserName() }}</strong>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+                <li><a class="dropdown-item" (click)="logOut()" role="button">Sign out</a></li>
+              </ul>
+            </div>
+            }
           </div>
         </div>
       </div>
@@ -40,16 +50,28 @@
   </nav>
 
   <!-- main router outlet -->
-  <div id="nav-margin">
-    <router-outlet></router-outlet>
-  </div>
+  <router-outlet></router-outlet>
+
+  <!-- global alert -->
+  <alert></alert>
 
 </div>
 
 <!-- app.component.html -->
 
 <style>
-  #nav-margin {
-    margin-top: 60px;
+  .alert-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1060;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 300px;
+  }
+
+  .custom-alert {
+    width: 100%;
   }
 </style>
