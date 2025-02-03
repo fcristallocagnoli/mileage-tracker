@@ -14,5 +14,4 @@ export interface UserDTO {
     userDisplayName: string;
     userEmail: string;
     userPhotoURL: string;
-    userTotalKms: number;
 }
