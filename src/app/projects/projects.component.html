@@ -1,4 +1,10 @@
-@if (userProjects.length === 0) {
+@if (userProject === undefined) {
+<div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <div class="spinner-border text-dark" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+}@else if (userProject === null) {
 <div class="d-grid gap-2 col-xl-4 col-lg-6 col-md-8 mx-auto pt-5 px-3">
     <div class="accordion shadow-sm" id="accordionExample">
         <div class="accordion-item">
@@ -10,20 +16,25 @@
             </h2>
             <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
                 <div class="accordion-body">
-                    <form>
+                    <form [formGroup]="joinForm" (ngSubmit)="onSubmitJoin()" autocomplete="off">
                         <div class="mb-3">
-                            <label for="logId" class="form-label">Log ID</label>
-                            <input type="text" class="form-control" id="logId" aria-describedby="logIdHelp">
-                            <div id="logIdHelp" class="form-text">Enter the ID of the log you want to join.</div>
+                            <label for="logId" class="form-label">Project ID</label>
+                            <input type="text" class="form-control" id="logId" formControlName="projectId"
+                                aria-describedby="logIdHelp">
+                            <div id="logIdHelp" class="form-text">Enter the ID of the project you want to join.</div>
                         </div>
                         <div class="mb-3">
-                            <label for="logPassword" class="form-label">Log Password</label>
-                            <input type="password" class="form-control" id="logPassword"
-                                aria-describedby="logPasswordHelp">
-                            <div id="logPasswordHelp" class="form-text">Enter the password of the log you want to join.
+                            <label for="logJoinPassword" class="form-label">Project Password</label>
+                            <input type="password" class="form-control" id="logJoinPassword"
+                                formControlName="projectPassword" aria-describedby="logPasswordHelp">
+                            <div id="logPasswordHelp" class="form-text">Enter the password of the project you want to
+                                join.
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-dark">Join Log</button>
+                        <button type="submit" [disabled]="submitting" class="btn btn-dark">
+                            <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
+                            Join Log
+                        </button>
                     </form>
                 </div>
             </div>
@@ -37,20 +48,39 @@
             </h2>
             <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
                 <div class="accordion-body">
-                    <form>
+                    <form [formGroup]="createForm" (ngSubmit)="onSubmitCreate()" autocomplete="off">
                         <div class="mb-3">
-                            <label for="logName" class="form-label">Log Name</label>
-                            <input type="text" class="form-control" id="logName" aria-describedby="logNameHelp">
-                            <div id="logNameHelp" class="form-text">Enter the name of the log you want to create.</div>
+                            <label for="logName" class="form-label">Project Name</label>
+                            <input type="text" class="form-control" id="logName" formControlName="projectName">
                         </div>
                         <div class="mb-3">
-                            <label for="logPassword" class="form-label">Log Password</label>
-                            <input type="password" class="form-control" id="logPassword"
-                                aria-describedby="logPasswordHelp">
-                            <div id="logPasswordHelp" class="form-text">Enter the password of the log you want to
-                                create.</div>
+                            <label for="logCreatePassword" class="form-label">Project Password</label>
+                            <input type="password" class="form-control" id="logCreatePassword"
+                                formControlName="projectPassword">
                         </div>
-                        <button type="submit" class="btn btn-dark">Create Log</button>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label for="logStartDate" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="logStartDate"
+                                    formControlName="projectStartDate">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label for="logEndDate" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="logEndDate"
+                                    formControlName="projectEndDate">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="logDescription" class="form-label">Project Description <span
+                                    class="form-text">(Optional)</span>
+                            </label>
+                            <textarea class="form-control" id="logDescription" rows="3"
+                                formControlName="projectDescription"></textarea>
+                        </div>
+                        <button type="submit" [disabled]="submitting" class="btn btn-dark">
+                            <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
+                            Create Log
+                        </button>
                     </form>
                 </div>
             </div>
@@ -58,32 +88,7 @@
     </div>
 </div>
 }@else {
-<ul class="nav nav-tabs">
-    @for (p of userProjects; track p.projectID) {
-    <li class="nav-item">
-        <a class="nav-link" [routerLink]="p.projectID" [ngClass]="{'active': $first}">
-            {{  p.projectName }}
-        </a>
-    </li>
-    }
-    <li class="nav-item">
-        <a class="nav-link">
-            <i class="fa-solid fa-plus"></i>
-        </a>
-    </li>
-    <!-- <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="#">Active</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#">Link</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#">Link</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-    </li> -->
-</ul>
+<app-view-project [project]="userProject" (hasProject)="userProject = $event"></app-view-project>
 }
 
 <style>
@@ -92,7 +97,6 @@
         --bs-accordion-btn-bg: var(--bs-secondary-color);
         --bs-accordion-active-color: var(--bs-light);
         --bs-accordion-active-bg: var(--bs-dark);
-        /* --bs-accordion-border-color: red; */
     }
 
     /* Change the color of the collapsed arrow */
