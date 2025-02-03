@@ -8,29 +8,50 @@
                         <p class="mx-auto fs-5">Optimiza tus viajes, ahorra combustible y controla tus gastos.</p>
                     </div>
                     <div class="d-flex justify-content-start column-gap-4">
-                        <button class="btn btn-dark px-4 py-2">
-                            Comenzar gratis
-                        </button>
-                        <button class="btn btn-light border px-4 py-2">
-                            Saber más
-                        </button>
+                        <a class="btn btn-light border px-4 py-2" href="mailto:fcristallocagnoli@gmail.com">
+                            <i class="fa-regular fa-envelope pe-1"></i>
+                            Contactar
+                        </a>
+                        <a class="btn btn-light border px-4 py-2"
+                            href="https://github.com/fcristallocagnoli/mileage-tracker" target="_blank">
+                            <i class="fa-brands fa-github"></i>
+                            Github
+                        </a>
                     </div>
                 </div>
             </div>
             <div class="col-lg-6">
                 <div class="card mx-auto">
                     <div class="card-body p-4">
-                        <h5 class="card-title fw-bold">Iniciar sesión</h5>
-                        <h6 class="card-subtitle mb-2 text-body-secondary">Accede a tu cuenta de Mileage Tracker</h6>
-                        <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
+                        <h5 class="card-title fw-bold">Accede a tu cuenta</h5>
+                        <h6 class="card-subtitle mb-2 text-body-secondary">Inicia sesión o regístrate para comenzar</h6>
+                        <div class="row mx-0 rounded py-1" style="background-color: #f4f4f5;">
+                            <div class="col-6 d-grid px-1">
+                                <button class="btn" [class.shadow-sm]="loginActive"
+                                    [style.background-color]="loginActive? '#fff' : ''"
+                                    style="--bs-btn-active-border-color: #fff;" (click)="loginActive = true">
+                                    Iniciar sesión
+                                </button>
+                            </div>
+                            <div class="col-6 d-grid px-1">
+                                <button class="btn" [class.shadow-sm]="!loginActive"
+                                    [style.background-color]="!loginActive? '#fff' : ''"
+                                    style="--bs-btn-active-border-color: #fff;" (click)="loginActive = false">
+                                    Registrarse
+                                </button>
+                            </div>
+                        </div>
+                        @if (loginActive) {
+                        <form [formGroup]="formLogin" (ngSubmit)="onSubmitLogin()" autocomplete="off">
                             <div class="my-3">
                                 <label class="form-label">Correo Electrónico</label>
-                                <input type="text" formControlName="email" class="form-control"
+                                <input type="text" formControlName="email" class="form-control" autocomplete="username"
                                     placeholder="name@example.com">
                             </div>
                             <div class="my-3">
                                 <label class="form-label">Contraseña</label>
-                                <input type="password" formControlName="password" class="form-control">
+                                <input type="password" formControlName="password" class="form-control"
+                                    autocomplete="current-password">
                             </div>
                             <div class="d-grid gap-2 mb-2 my-4">
                                 <button class="btn btn-dark" type="submit" [disabled]="submitting">
@@ -56,6 +77,47 @@
                                 </button>
                             </div>
                         </form>
+                        }@else {
+                        <form [formGroup]="formRegister" (ngSubmit)="onSubmitRegister()" autocomplete="off">
+                            <div class="my-3">
+                                <label class="form-label">Nombre Completo</label>
+                                <input type="text" formControlName="fullName" class="form-control" autocomplete="name">
+                            </div>
+                            <div class="my-3">
+                                <label class="form-label">Correo Electrónico</label>
+                                <input type="text" formControlName="email" class="form-control" autocomplete="username"
+                                    placeholder="name@example.com" name="email">
+                            </div>
+                            <div class="my-3">
+                                <label class="form-label">Contraseña</label>
+                                <input type="password" formControlName="password" class="form-control"
+                                    autocomplete="new-password">
+                            </div>
+                            <div class="d-grid gap-2 mb-2 my-4">
+                                <button class="btn btn-dark" type="submit" [disabled]="submitting">
+                                    <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
+                                    Registrarse
+                                </button>
+                            </div>
+                            <div class="separator my-2" style="font-size: 12px">
+                                <span class="text-body-secondary p-1">O CONTINÚA CON</span>
+                            </div>
+                            <div class="d-grid gap-2 mb-2">
+                                <button class="btn btn-light border" type="button" (click)="onClickGoogle()">
+                                    <svg class="" aria-hidden="true" focusable="false" data-prefix="fab"
+                                        data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 536 560" width="16" height="16">
+                                        <path fill="currentColor"
+                                            d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z">
+                                        </path>
+                                    </svg>
+                                    <span class="mx-1">
+                                        Registrarse con Google
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                        }
                     </div>
                 </div>
             </div>
@@ -63,8 +125,8 @@
     </section>
 
     <section class="container-fluid p-4" style="background-color: #f3f4f6;">
-        <h2 class="fw-bold text-center mb-5" style="font-size: 2.25rem;">
-            Características principales
+        <h2 class="fw-bold text-center mb-5 mt-3" style="font-size: 2.25rem;">
+            Funcionamiento básico
         </h2>
         <div class="row my-3 mx-4 row-gap-3">
             <div class="col-md-6 col-lg-4 px-4">
@@ -105,24 +167,15 @@
             <a href="#" class="nav-link px-2 text-body-secondary">Home</a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link px-2 text-body-secondary">Features</a>
-        </li>
-        <li class="nav-item">
             <a href="mailto:fcristallocagnoli@gmail.com" class="nav-link px-2 text-body-secondary">
                 Contact
             </a>
         </li>
         <li class="nav-item">
-            <a href="https://github.com/fcristallocagnoli/Mileage-Tracker" target="_blank"
+            <a href="https://github.com/fcristallocagnoli/mileage-tracker" target="_blank"
                 class="nav-link px-2 text-body-secondary">
                 Github
             </a>
-        </li>
-        <li class="nav-item">
-            <a href="#" class="nav-link disabled px-2 text-body-secondary">FAQs</a>
-        </li>
-        <li class="nav-item">
-            <a href="#" class="nav-link disabled px-2 text-body-secondary">About</a>
         </li>
     </ul>
 </footer>
