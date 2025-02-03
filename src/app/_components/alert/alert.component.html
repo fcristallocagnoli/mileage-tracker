@@ -3,6 +3,28 @@
     <div class="m-3 alert-container">
         @for (alert of alerts; track alert.id) {
         <div class="{{cssClasses(alert)}} custom-alert">
+            @switch (alert.type) {
+            @case (0) {
+            <span class="pe-2">
+                <i class="fa-solid fa-circle-check"></i>
+            </span>
+            }
+            @case (1) {
+            <span class="pe-2">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </span>
+            }
+            @case (2) {
+            <span class="pe-2">
+                <i class="fa-solid fa-circle-info"></i>
+            </span>
+            }
+            @case (3) {
+            <span class="pe-2">
+                <i class="fa-solid fa-circle-exclamation"></i>
+            </span>
+            }
+            }
             <span [innerHTML]="alert.message"></span>
             <button class="btn-close" (click)="removeAlert(alert)"></button>
         </div>
