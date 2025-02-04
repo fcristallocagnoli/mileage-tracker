@@ -18,7 +18,6 @@ import { ViewProjectComponent } from "./view-project/view-project.component";
 export default class ProjectsComponent implements OnInit {
   userProject?: ProjectDTO | null;
 
-  currentUser = this.authService.accountValue;
   currentUserId = this.authService.accountValue?.uid!;
 
   submitting = false;
@@ -40,8 +39,7 @@ export default class ProjectsComponent implements OnInit {
     private authService: AuthService,
     private backendService: BackendService,
     private alertService: AlertService,
-  ) {
-  }
+  ) { }
 
   ngOnInit() {
     this.backendService.getUserProject(this.currentUserId, (project) => {
@@ -49,13 +47,13 @@ export default class ProjectsComponent implements OnInit {
     });
   }
 
-  // TODO: join project
   onSubmitJoin() {
     // reset alerts on submit
     this.alertService.clear();
 
     // stop here if form is invalid
     if (this.joinForm.invalid) {
+      this.alertService.error("Incorrect form data");
       return;
     }
 
@@ -79,6 +77,7 @@ export default class ProjectsComponent implements OnInit {
 
     // stop here if form is invalid
     if (this.createForm.invalid) {
+      this.alertService.error("Incorrect form data");
       return;
     }
 

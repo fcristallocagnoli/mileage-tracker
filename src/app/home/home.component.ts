@@ -2,10 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UserToLogIn, UserToRegister } from '../interfaces/user.interface';
-import { AuthService } from '../services/auth.service';
 import { AlertService } from '@app/services/alert.service';
 import { BackendService } from '@app/services/backend.service';
+import { UserToLogIn, UserToRegister } from '../interfaces/user.interface';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -39,6 +39,7 @@ export class HomeComponent {
 
   onSubmitLogin() {
     if (this.formLogin.invalid) {
+      this.alertService.error("Incorrect form data");
       return;
     }
     this.loginService.logIn(this.formLogin.value as UserToLogIn)
@@ -55,6 +56,7 @@ export class HomeComponent {
 
   onSubmitRegister() {
     if (this.formRegister.invalid) {
+      this.alertService.error("Incorrect form data");
       return;
     }
     this.submitting = true;
