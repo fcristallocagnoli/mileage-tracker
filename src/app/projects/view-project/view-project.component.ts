@@ -24,7 +24,7 @@ export class ViewProjectComponent implements OnInit {
   @Output() hasProject = new EventEmitter<null>();
 
   form = new FormGroup({
-    tripDate: new FormControl(format(new Date(), "YYYY-MM-DD"), Validators.required),
+    tripDate: new FormControl('', Validators.required),
     tripStartKm: new FormControl('', Validators.required),
     tripEndKm: new FormControl('', Validators.required),
   }, { validators: [MustBePositive()] });
@@ -72,7 +72,9 @@ export class ViewProjectComponent implements OnInit {
   onSubmit() {
     if (this.form.invalid) {
       const controls = this.form.controls;
-      if (controls.tripStartKm.invalid) {
+      if (controls.tripDate.invalid) {
+        this.alertService.error('Fecha inválida');
+      } else if (controls.tripStartKm.invalid) {
         this.alertService.error('Kilómetros iniciales inválidos');
       } else if (controls.tripEndKm.invalid) {
         this.alertService.error('Kilómetros finales inválidos');

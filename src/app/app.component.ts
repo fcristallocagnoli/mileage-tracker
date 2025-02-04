@@ -44,15 +44,17 @@ export class AppComponent {
       console.debug("No user to delete");
       return;
     }
-    this.backendService.deleteAccount(user).then(() => {
-      this.router.navigate(['/']);
-    }).catch((error) => {
-      if (error.code === 'auth/requires-recent-login') {
-        this.alertService.error(`
-          <span>User requires recent login</span>
-          <p>Log out and log in again to delete account.</p>
-        `);
-      }
-    });
+    if (prompt("¿Seguro que quieres eliminar tu cuenta? Escribe 'ELIMINAR' para confirmar") === 'ELIMINAR') {
+      this.backendService.deleteAccount(user).then(() => {
+        this.router.navigate(['/']);
+      }).catch((error) => {
+        if (error.code === 'auth/requires-recent-login') {
+          this.alertService.error(`
+            <span>User requires recent login</span>
+            <p>Log out and log in again to delete account.</p>
+          `);
+        }
+      });
+    }
   }
 }
