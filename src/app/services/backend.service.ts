@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { ProjectCreation, ProjectDTO, ProjectJoin } from '@app/interfaces/project.interface';
 import { TripCreation, TripDTO } from '@app/interfaces/trip.interface';
 import { UserToRegister } from '@app/interfaces/user.interface';
-import { UserCredential } from 'firebase/auth';
+import { deleteUser, User, UserCredential } from 'firebase/auth';
 
 import { child, get, getDatabase, onValue, push, ref, update } from "firebase/database";
 import { sha256 } from 'js-sha256';
@@ -27,7 +27,6 @@ export class BackendService {
         userId: userCred.user.uid,
         userDisplayName: userToRegister.fullName.split(' ')[0],
         userEmail: userToRegister.email,
-        userTotalKms: 0,
       });
     }
   }
@@ -40,12 +39,28 @@ export class BackendService {
     if (!snapshot.exists()) {
       await update(userRef, {
         userId: user.uid,
-        userDisplayName: user.displayName || user.email!.split('@')[0],
+        userDisplayName: user.displayName?.split(' ')[0] || user.email!.split('@')[0],
         userEmail: user.email,
         userPhotoURL: user.photoURL,
-        userTotalKms: 0,
       });
     }
+  }
+
+  deleteAccount(user: User) {
+    const updates = {
+      // Elimino referencia al usuario en el proyecto
+      [`projects/${user.uid}/projectUsers/${user.uid}`]: null,
+      // Elimino el usuario
+      [`users/${user.uid}`]: null,
+    }
+
+    // return Promise.reject("Unknown error deleting account");
+    deleteUser(user).then(() => {
+      console.log("todo va bien");
+    }).catch((error) => {
+      return Promise.reject(error);
+    });
+    return update(ref(this.database), updates);
   }
 
   async createProjectAndAsignToUser(project: ProjectCreation, userId: string) {
@@ -66,11 +81,39 @@ export class BackendService {
       [`projects/${newProjectKey}`]: { ...projectDBData, projectUsers: { [userId]: true } },
       // Referencia al proyecto en el usuario (no hay mas de un proyecto por usuario)
       // Kms hechos por el usuario en el proyecto a 0
-      [`users/${userId}/userProject`]: { projectId: newProjectKey, projectKms: 0 },
+      [`users/${userId}/userProject`]: { projectId: newProjectKey, projectKms: 0, projectRole: 'admin' },
     }
 
     await update(ref(this.database), updates);
     return projectDBData;
+  }
+
+  leaveProject(userId: string, projectId: string) {
+    const updates = {
+      // Elimino referencia al usuario en el proyecto
+      [`projects/${projectId}/projectUsers/${userId}`]: null,
+      // Elimino referencia al proyecto en el usuario
+      [`users/${userId}/userProject`]: null,
+    }
+
+    return update(ref(this.database), updates);
+  }
+
+  async deleteProject(projectId: string) {
+    const snapshot = await get(ref(this.database, `projects/${projectId}/projectUsers`));
+    if (snapshot.exists()) {
+      const userIds = Object.keys(snapshot.val());
+      const updates: any = {};
+
+      userIds.forEach(userId => {
+        updates[`users/${userId}/userProject`] = null;
+      });
+
+      updates[`projects/${projectId}`] = null;
+      updates[`trips/${projectId}`] = null;
+
+      return update(ref(this.database), updates);
+    }
   }
 
   getUserProject(userId: string, callback: (project: ProjectDTO | null) => void) {
@@ -80,7 +123,7 @@ export class BackendService {
         const projectSnapshot = await get(ref(this.database, `projects/${projectId}`));
         const { projectPasswordHash, ...projectData } = projectSnapshot.val();
         // const project = { ...projectData, projectTrips: [] };
-        console.log("Project", projectData);
+        console.debug("User", userId, "Project:", projectData);
         callback(projectData);
       } else {
         callback(null);
@@ -98,7 +141,7 @@ export class BackendService {
           const userSnapshot = await get(ref(this.database, `users/${userId}`));
           return userSnapshot.val();
         }));
-        console.log("Users", users);
+        console.debug("Project Users", users);
         callback(users);
       } else {
         callback([]);
@@ -109,63 +152,33 @@ export class BackendService {
   }
 
   async createNewTrip(trip: TripCreation, uid: string, project: ProjectDTO) {
-    const tripSnapshot = await get(ref(this.database, `trips/${project.projectId}`));
+    const newTripKey = push(child(ref(this.database), 'trips')).key;
     const userName = (await get(ref(this.database, `users/${uid}/userDisplayName`))).val();
 
-    let newTripKey = push(child(ref(this.database), 'trips')).key;
-    let tripDBData: TripDTO;
+    const tripDBData: TripDTO = {
+      tripId: newTripKey!,
+      tripUserId: uid,
+      tripUserName: userName,
+      tripDate: trip.tripDate,
+      tripStartKm: trip.tripStartKm,
+      tripEndKm: trip.tripEndKm,
+      tripTotalKms: trip.tripEndKm - trip.tripStartKm,
+    };
 
-    let existingTrip: any = null;
-
-    if (tripSnapshot.exists()) {
-      const trips = tripSnapshot.val();
-      const existingTripKey = Object.keys(trips).find(key => trips[key].tripUserId === uid && trips[key].tripDate === trip.tripDate);
-
-      if (existingTripKey) {
-        existingTrip = trips[existingTripKey];
-        tripDBData = {
-          ...existingTrip,
-          tripStartKm: Math.min(existingTrip.tripStartKm, trip.tripStartKm),
-          tripEndKm: Math.max(existingTrip.tripEndKm, trip.tripEndKm),
-          tripTotalKms: Math.max(existingTrip.tripEndKm, trip.tripEndKm) - Math.min(existingTrip.tripStartKm, trip.tripStartKm),
-        };
-        newTripKey = existingTripKey;
-      } else {
-        tripDBData = {
-          tripId: newTripKey!,
-          tripUserId: uid,
-          tripUserName: userName,
-          tripDate: trip.tripDate,
-          tripStartKm: trip.tripStartKm,
-          tripEndKm: trip.tripEndKm,
-          tripTotalKms: trip.tripEndKm - trip.tripStartKm,
-        };
-      }
-    } else {
-      tripDBData = {
-        tripId: newTripKey!,
-        tripUserId: uid,
-        tripUserName: userName,
-        tripDate: trip.tripDate,
-        tripStartKm: trip.tripStartKm,
-        tripEndKm: trip.tripEndKm,
-        tripTotalKms: trip.tripEndKm - trip.tripStartKm,
-      };
-    }
+    console.debug("Creating new trip:", tripDBData);
 
     const previousProjectTotalKms = (await get(ref(this.database, `projects/${project.projectId}/projectTotalKms`))).val();
     const userProjectSnapshot = await get(ref(this.database, `users/${uid}/userProject`));
     const previousKms = userProjectSnapshot.val().projectKms;
-    const newKmsToAdd = tripDBData.tripTotalKms - (existingTrip ? existingTrip.tripTotalKms : 0);
 
     const updates = {
       // Nuevo trip o actualización del existente
       [`trips/${project.projectId}/${newTripKey}`]: tripDBData,
       // Referencia al trip en el usuario
       [`users/${uid}/userProject/projectUserTrips/${newTripKey}`]: true,
-      [`users/${uid}/userProject/projectKms`]: previousKms + newKmsToAdd,
+      [`users/${uid}/userProject/projectKms`]: previousKms + tripDBData.tripTotalKms,
       // Actualizar los kms totales del proyecto
-      [`projects/${project.projectId}/projectTotalKms`]: previousProjectTotalKms + newKmsToAdd,
+      [`projects/${project.projectId}/projectTotalKms`]: previousProjectTotalKms + tripDBData.tripTotalKms,
     };
 
     await update(ref(this.database), updates);
@@ -176,6 +189,7 @@ export class BackendService {
     onValue(ref(this.database, `trips/${projectId}`), (snapshot) => {
       if (snapshot.exists()) {
         const trips = Object.keys(snapshot.val()).map((tripId: string) => snapshot.val()[tripId]);
+        console.debug("Project", projectId, "trips:", trips);
         callback(trips);
       } else {
         callback([]);
@@ -193,7 +207,7 @@ export class BackendService {
           const tripSnapshot = await get(ref(this.database, `trips/${tripId}`));
           return tripSnapshot.val();
         }));
-        console.log("User Trips", trips);
+        console.debug(`User ${userId} trips: ${trips}`);
         callback(trips);
       } else {
         callback([]);
@@ -211,6 +225,7 @@ export class BackendService {
           if (project.projectPasswordHash === sha256(projectJoin.projectPassword)) {
             update(ref(this.database, `users/${uid}/userProject`), {
               projectId: projectJoin.projectId,
+              projectRole: 'user',
               projectKms: 0,
             });
             update(ref(this.database, `projects/${projectJoin.projectId}/projectUsers`), {
@@ -226,5 +241,4 @@ export class BackendService {
       });
     });
   }
-  
 }
