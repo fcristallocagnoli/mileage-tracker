@@ -28,9 +28,13 @@
                             Último viaje
                         </div>
                         <p class="card-text">
-                            {{ lastTrip?.tripStartKm }} - {{ lastTrip?.tripEndKm }} km <br>
-                            Realizado por: {{ lastTrip?.tripUserName }} <br>
-                            El dia {{ lastTrip?.tripDate | date: 'mediumDate' }}
+                            @if (lastTrip) {
+                            {{ lastTrip.tripStartKm }} - {{ lastTrip.tripEndKm }} km <br>
+                            Realizado por: {{ lastTrip.tripUserName }} <br>
+                            El dia {{ lastTrip.tripDate | date: 'mediumDate' }}
+                            }@else {
+                            No hay datos de viajes
+                            }
                         </p>
                     </div>
                 </div>
@@ -66,7 +70,8 @@
                         </div>
                         <div class="mb-3">
                             <label for="logKmIniciales" class="form-label">Kilometros Iniciales</label>
-                            <input type="text" class="form-control" id="logKmIniciales" formControlName="tripStartKm" [placeholder]="getLastKms()">
+                            <input type="text" class="form-control" id="logKmIniciales" formControlName="tripStartKm"
+                                [placeholder]="getLastKms()">
                         </div>
                         <div class="mb-3">
                             <label for="logKmFinales" class="form-label">Kilometros Finales</label>
@@ -87,15 +92,15 @@
                     <div class="card-text pb-2 d-flex justify-content-between"
                         [ngClass]="{ 'pb-2': $first, 'py-2': !$first }">
                         <span>{{ user.userDisplayName }}</span>
-                        <span>{{ calculateUsage(user.userId) }}%</span>
+                        <span>{{ calculateUsage(user) }}%</span>
                     </div>
                     <div class="progress" role="progressbar" aria-label="Basic example"
                         [attr.aria-valuenow]="calculateUsage(user)" aria-valuemin="0" aria-valuemax="100"
                         style="height: 5px;">
-                        <div class="progress-bar bg-dark" [style.width]="calculateUsage(user.userId) + '%'"></div>
+                        <div class="progress-bar bg-dark" [style.width]="calculateUsage(user) + '%'"></div>
                     </div>
                     <div class="form-text">
-                        {{ getKmForUser(user.userId) }} km recorridos en 19 dias
+                        {{ user.userProject.projectKms }} km recorridos
                     </div>
                     }
                 </div>
@@ -114,7 +119,48 @@
                     <p-chart type="line" [data]="myData" [options]="options" class="h-[30rem]" height="340" />
                 </div>
             </div>
-            <button class="btn btn-dark">Leave Project</button>
+            <div class="d-flex column-gap-4">
+                @if (currentUserRole === 'admin') {
+                <button type="button" class="btn btn-danger flex-fill" data-bs-toggle="modal"
+                    [disabled]="deleteSubmitting" data-bs-target="#exampleModal">
+                    <span *ngIf="deleteSubmitting" class="spinner-border spinner-border-sm me-1"></span>
+                    Delete Project
+                </button>
+                }@else {
+                <button class="btn btn-dark flex-fill" [disabled]="leaveSubmitting" (click)="leaveProject()">
+                    <span *ngIf="leaveSubmitting" class="spinner-border spinner-border-sm me-1"></span>
+                    Leave Project
+                </button>
+                }
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">Calculadora de Gastos</h5>
+                    <h6 class="form-text">Calcula el gasto de gasolina por usuario</h6>
+                    <div class="d-flex friki column-gap-4">
+                        <form class="d-flex flex-column" (ngSubmit)="calculateCost()">
+                            <div class="mb-3">
+                                <label for="totalGasolina" class="form-label">Total de Gasolina Gastada (en €)</label>
+                                <input type="number" class="form-control" id="totalGasolina" [(ngModel)]="totalGasolina"
+                                    name="totalGasolina">
+                            </div>
+                            <button type="submit" class="btn btn-dark">Calcular</button>
+                        </form>
+                        <div style="border-left:1px solid #dee2e6;"></div>
+                        <div id="coste-usuario" class="flex-fill">
+                            @if (costPerUser) {
+                            <h6 class="form-text">Coste por Usuario</h6>
+                            @for (user of projectUsers; track user.userId) {
+                            <div class="d-flex justify-content-between">
+                                <span>{{ user.userDisplayName }}</span>
+                                <span>{{ calculateUserCost(user) | currency: 'EUR' }}</span>
+                            </div>
+                            }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -123,9 +169,14 @@
         .friki {
             flex-direction: column;
         }
+
         #friki {
             flex-direction: column;
             flex-flow: column-reverse;
+        }
+
+        #coste-usuario {
+            margin-top: 16px;
         }
 
         /* #grafica {
@@ -133,3 +184,27 @@
         } */
     }
 </style>
+
+<!-- Modal -->
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content rounded-3 shadow">
+            <div class="modal-body p-4 text-center">
+                <h5 >¿Seguro que quieres borrar el proyecto?</h5>
+                <p class="mb-0">Todos los usuarios miembros serán expulsados del proyecto.</p>
+            </div>
+            <div class="modal-footer flex-nowrap p-0">
+                <button type="button" (click)="deleteProject()"
+                    class="btn btn-lg btn-link fs-6 text-decoration-none col-6 py-3 m-0 rounded-0 border-end"
+                    data-bs-dismiss="modal">
+                    <strong>Yes, delete it</strong>
+                </button>
+                <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 py-3 m-0 rounded-0"
+                    data-bs-dismiss="modal">
+                    No thanks
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
