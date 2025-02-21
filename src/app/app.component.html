@@ -4,9 +4,8 @@
     <div class="container-fluid px-4">
       <!-- Home -->
       <a routerLink="/" routerLinkActive="active" class="navbar-brand">
-        <i class="fa-solid fa-location-dot">
-          <span class="px-3">Mileage Tracker</span>
-        </i>
+        <i class="fa-solid fa-location-dot"></i>
+        <span class="px-3">MILEAGE TRACKER</span>
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
         aria-controls="offcanvasNavbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,10 +38,6 @@
                 <strong>{{ getUserName() }}</strong>
               </a>
               <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-small shadow">
-                <li><a class="dropdown-item" (click)="deleteAccount()" role="button">Delete Account</a></li>
-                <li>
-                  <hr class="dropdown-divider">
-                </li>
                 <li><a class="dropdown-item" (click)="logOut()" role="button">Sign out</a></li>
               </ul>
             </div>

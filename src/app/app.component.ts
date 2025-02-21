@@ -1,9 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AlertComponent } from './_components/alert/alert.component';
+import { AlertService } from './services/alert.service';
 import { AuthService } from './services/auth.service';
 import { BackendService } from './services/backend.service';
-import { AlertService } from './services/alert.service';
 
 @Component({
   selector: 'app-root',
@@ -38,23 +38,4 @@ export class AppComponent {
     });
   }
 
-  deleteAccount() {
-    const user = this.getUser();
-    if (!user) {
-      console.debug("No user to delete");
-      return;
-    }
-    if (prompt("¿Seguro que quieres eliminar tu cuenta? Escribe 'ELIMINAR' para confirmar") === 'ELIMINAR') {
-      this.backendService.deleteAccount(user).then(() => {
-        this.router.navigate(['/']);
-      }).catch((error) => {
-        if (error.code === 'auth/requires-recent-login') {
-          this.alertService.error(`
-            <span>User requires recent login</span>
-            <p>Log out and log in again to delete account.</p>
-          `);
-        }
-      });
-    }
-  }
 }

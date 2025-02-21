@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { ProjectCreation, ProjectDTO, ProjectJoin } from '@app/interfaces/project.interface';
 import { TripCreation, TripDTO } from '@app/interfaces/trip.interface';
 import { UserToRegister } from '@app/interfaces/user.interface';
-import { deleteUser, User, UserCredential } from 'firebase/auth';
+import { UserCredential } from 'firebase/auth';
 
 import { child, get, getDatabase, onValue, push, ref, update } from "firebase/database";
 import { sha256 } from 'js-sha256';
@@ -44,23 +44,6 @@ export class BackendService {
         userPhotoURL: user.photoURL,
       });
     }
-  }
-
-  deleteAccount(user: User) {
-    const updates = {
-      // Elimino referencia al usuario en el proyecto
-      [`projects/${user.uid}/projectUsers/${user.uid}`]: null,
-      // Elimino el usuario
-      [`users/${user.uid}`]: null,
-    }
-
-    // return Promise.reject("Unknown error deleting account");
-    deleteUser(user).then(() => {
-      console.log("todo va bien");
-    }).catch((error) => {
-      return Promise.reject(error);
-    });
-    return update(ref(this.database), updates);
   }
 
   async createProjectAndAsignToUser(project: ProjectCreation, userId: string) {
