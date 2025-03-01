@@ -5,7 +5,7 @@
         <div class="d-flex flex-column m-5 mb-2 mt-0 row-gap-4">
             <!-- Flex horizontal -->
             <div class="friki d-flex column-gap-4 flex-lg-row row-gap-4">
-                <div class="card">
+                <div class="card flex-fill">
                     <div class="card-body">
                         <div class="card-title fs-5 fw-bold">
                             {{ project.projectName }}
@@ -64,6 +64,15 @@
                 <div class="flex-fill">
                     <h5 class="fw-bold">Introduce los kilometros</h5>
                     <form class="d-flex flex-column" [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
+                        <!-- [ DEBUG START ]: Para testear la creación de un viaje con un usuario distinto -->
+                        <div class="mb-3" [hidden]="!debugMode">
+                            <label for="logUsuario" class="form-label">Usuario</label>
+                            <select class="form-select" id="logUsuario" formControlName="tripUserId">
+                                <option *ngFor="let user of projectUsers" [value]="user.userId">{{ user.userDisplayName
+                                    }}</option>
+                            </select>
+                        </div>
+                        <!-- [ DEBUG FINAL ] -->
                         <div class="mb-3">
                             <label for="logFecha" class="form-label">Fecha</label>
                             <input type="date" class="form-control" id="logFecha" formControlName="tripDate">
@@ -120,6 +129,13 @@
                 </div>
             </div>
             <div class="d-flex column-gap-4">
+                <!-- <button type="button" class="btn btn-outline-dark btn-sm" (click)="exportData()">
+                    Exportar datos
+                </button> -->
+                <button type="button" class="btn btn-outline-dark btn-sm" data-bs-toggle="modal"
+                    data-bs-target="#exportModal">
+                    Exportar datos
+                </button>
                 @if (currentUserRole === 'admin') {
                 <button type="button" class="btn btn-danger flex-fill" data-bs-toggle="modal"
                     [disabled]="deleteSubmitting" data-bs-target="#exampleModal">
@@ -191,7 +207,7 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content rounded-3 shadow">
             <div class="modal-body p-4 text-center">
-                <h5 >¿Seguro que quieres borrar el proyecto?</h5>
+                <h5>¿Seguro que quieres borrar el proyecto?</h5>
                 <p class="mb-0">Todos los usuarios miembros serán expulsados del proyecto.</p>
             </div>
             <div class="modal-footer flex-nowrap p-0">
@@ -203,6 +219,29 @@
                 <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 py-3 m-0 rounded-0"
                     data-bs-dismiss="modal">
                     No thanks
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content rounded-3 shadow">
+            <div class="modal-header border-bottom-0">
+                <h1 class="modal-title fs-5">Introduce el coste total de gasolina</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-0">
+                <div class="mb-3">
+                    <label for="totalGasolinaModal" class="form-label">Total de Gasolina Gastada (en €)</label>
+                    <input type="number" class="form-control" id="totalGasolinaModal" [(ngModel)]="totalGasolina"
+                        name="totalGasolinaModal">
+                </div>
+            </div>
+            <div class="modal-footer flex-column align-items-stretch w-100 gap-2 pb-3 border-top-0">
+                <button type="button" class="btn btn-lg btn-dark" (click)="exportData()" data-bs-dismiss="modal">
+                    Exportar datos
                 </button>
             </div>
         </div>
