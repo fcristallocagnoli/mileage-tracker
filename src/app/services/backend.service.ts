@@ -71,6 +71,36 @@ export class BackendService {
     return projectDBData;
   }
 
+  async joinProject(projectJoin: ProjectJoin, uid: string) {
+    const projectRef = ref(this.database, 'projects/' + projectJoin.projectId);
+    const snapshot = await get(projectRef);
+
+    if (snapshot.exists()) {
+      const project = snapshot.val();
+      const userCount = Object.keys(project.projectUsers || {}).length;
+
+      if (userCount >= 5) {
+        throw new Error("Project has reached the maximum number of users");
+      }
+
+      if (project.projectPasswordHash === sha256(projectJoin.projectPassword)) {
+        await update(ref(this.database, `users/${uid}/userProject`), {
+          projectId: projectJoin.projectId,
+          projectRole: 'user',
+          projectKms: 0,
+        });
+        await update(ref(this.database, `projects/${projectJoin.projectId}/projectUsers`), {
+          [uid]: true,
+        });
+        return project;
+      } else {
+        throw new Error("Invalid project password");
+      }
+    } else {
+      throw new Error("Project not found");
+    }
+  }
+
   leaveProject(userId: string, projectId: string) {
     const updates = {
       // Elimino referencia al usuario en el proyecto
@@ -200,28 +230,4 @@ export class BackendService {
     });
   }
 
-  joinProject(projectJoin: ProjectJoin, uid: string) {
-    return new Promise<ProjectDTO>((resolve, reject) => {
-      get(ref(this.database, 'projects/' + projectJoin.projectId)).then((snapshot) => {
-        if (snapshot.exists()) {
-          const project = snapshot.val();
-          if (project.projectPasswordHash === sha256(projectJoin.projectPassword)) {
-            update(ref(this.database, `users/${uid}/userProject`), {
-              projectId: projectJoin.projectId,
-              projectRole: 'user',
-              projectKms: 0,
-            });
-            update(ref(this.database, `projects/${projectJoin.projectId}/projectUsers`), {
-              [uid]: true,
-            });
-            resolve(project);
-          } else {
-            reject("Invalid project password");
-          }
-        } else {
-          reject("Project not found");
-        }
-      });
-    });
-  }
 }
