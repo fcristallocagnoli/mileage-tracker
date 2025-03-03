@@ -39,7 +39,15 @@ export class ViewProjectComponent implements OnInit {
 
   projectUsers: any[] = [];
 
-  isCopied: boolean = false;
+  isCopied: any = {
+    "projectID": false,
+    "lastKms": false
+  }
+
+  copyInfoAlert: any = {
+    "projectID": "ID del proyecto copiado",
+    "lastKms": "Últimos kilómetros copiados"
+  }
 
   myData: any = { datasets: [] };
 
@@ -256,12 +264,12 @@ export class ViewProjectComponent implements OnInit {
     }
   }
 
-  copyToClipboard(text: any) {
+  copyToClipboard(text: any, element: string) {
     navigator.clipboard.writeText(text).then(() => {
-      this.isCopied = true;
-      this.alertService.info('ID del proyecto copiado al portapapeles');
+      this.isCopied[element] = true;
+      this.alertService.info(this.copyInfoAlert[element]);
       setTimeout(() => {
-        this.isCopied = false;
+        this.isCopied[element] = false;
       }, 2000);
     }, (err) => {
       this.alertService.error('No se pudo copiar: ', err);

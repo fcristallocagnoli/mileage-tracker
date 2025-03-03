@@ -7,26 +7,36 @@
             <div class="friki d-flex column-gap-4 flex-lg-row row-gap-4">
                 <div class="card flex-fill">
                     <div class="card-body">
-                        <div class="card-title fs-5 fw-bold">
+                        <h5 class="card-title fs-5 fw-bold d-flex justify-content-between">
                             {{ project.projectName }}
-                        </div>
+                            <button class="btn btn-sm btn-dark"
+                                (click)="copyToClipboard(project.projectId, 'projectID')">
+                                @if (!isCopied['projectID']) {
+                                <i class="fa-regular fa-copy pe-1"></i>
+                                Copiar ID
+                                }@else {
+                                <i class="fa-solid fa-check pe-1"></i>
+                                ID Copiado!
+                                }
+                            </button>
+                        </h5>
+                        <h6 class="form-text">Proyecto ID: {{ project.projectId }}</h6>
                         <p class="card-text">{{ project.projectDescription }}</p>
-                        <button class="btn btn-sm btn-dark" (click)="copyToClipboard(project.projectId)">
-                            @if (!isCopied) {
-                            <i class="fa-regular fa-copy pe-1"></i>
-                            Copiar ID del Proyecto
-                            }@else {
-                            <i class="fa-solid fa-check pe-1"></i>
-                            ID Copiado!
-                            }
-                        </button>
                     </div>
                 </div>
-                <div class="card flex-fill">
+                <div class="card">
                     <div class="card-body">
-                        <div class="card-title fs-5 fw-bold">
+                        <h5 class="card-title fs-5 fw-bold d-flex justify-content-between">
                             Último viaje
-                        </div>
+                            <button class="btn btn-sm btn-dark ms-3" [disabled]="!lastTrip"
+                                (click)="copyToClipboard(lastTrip?.tripEndKm, 'lastKms')">
+                                @if (!isCopied['lastKms']) {
+                                <i class="fa-regular fa-copy"></i>
+                                }@else {
+                                <i class="fa-solid fa-check"></i>
+                                }
+                            </button>
+                        </h5>
                         <p class="card-text">
                             @if (lastTrip) {
                             {{ lastTrip.tripStartKm }} - {{ lastTrip.tripEndKm }} km <br>
