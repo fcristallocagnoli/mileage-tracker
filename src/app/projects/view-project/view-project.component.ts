@@ -4,7 +4,7 @@ import { ChartModule } from 'primeng/chart';
 
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MustBePositive } from '@app/_helpers/must-be-positive.validator';
+import { MustBePositive, MustBeInRange } from '@app/_helpers';
 import { TripCreation, TripDTO } from '@app/interfaces/trip.interface';
 import { AlertService } from '@app/services/alert.service';
 import { AuthService } from '@app/services/auth.service';
@@ -80,6 +80,8 @@ export class ViewProjectComponent implements OnInit {
       // Construimos los datasets para el gráfico
       this.buildDatasets();
     });
+    // añade un validador nuevo (MustBeInRange(this.project)) al formGroup
+    this.form.setValidators([MustBePositive(), MustBeInRange(this.project.projectStartDate, this.project.projectEndDate)]);
   }
 
   onSubmit() {
