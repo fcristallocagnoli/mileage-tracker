@@ -19,7 +19,7 @@ export function MustBePositive() {
     const endKmValue = Number(tripEndKm.value);
 
     // set error on tripEndKm if validation fails
-    if (startKmValue > endKmValue) {
+    if (startKmValue >= endKmValue) {
       tripEndKm.setErrors({ mustBePositive: true });
     } else {
       tripEndKm.setErrors(null);
