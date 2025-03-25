@@ -119,7 +119,7 @@
                         <div class="progress-bar bg-dark" [style.width]="calculateUsage(user) + '%'"></div>
                     </div>
                     <div class="form-text">
-                        {{ user.userProject.projectKms }} km recorridos
+                        {{ user.userProject.projectKms }} km recorridos en {{ calculateUserTotalTrips(user) }} viajes
                     </div>
                     }
                 </div>

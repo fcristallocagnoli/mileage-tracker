@@ -311,6 +311,14 @@ export class ViewProjectComponent implements OnInit {
     return this.costPerUser[user.userId] || 0;
   }
 
+  calculateUserTotalTrips(user: any): number {
+    if (user.userProject.projectUserTrips) {
+      return Object.keys(user.userProject.projectUserTrips).length;
+    } else {
+      return 0;
+    }
+  }
+
   exportData() {
     console.debug("Exporting data...", this.projectUsers);
 
