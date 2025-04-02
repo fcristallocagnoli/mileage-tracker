@@ -119,7 +119,16 @@
                         <div class="progress-bar bg-dark" [style.width]="calculateUsage(user) + '%'"></div>
                     </div>
                     <div class="form-text">
-                        {{ user.userProject.projectKms }} km recorridos en {{ calculateUserTotalTrips(user) }} viajes
+                        @if (user.userProject.projectKms !== 0) {
+                        {{ user.userProject.projectKms }} km recorridos en
+                        {{ (user.userProject.projectUserTrips | keyvalue).length }} viajes.
+                        <span class="only-desktop">
+                            Una media de
+                            {{ user.userProject.projectKms / (user.userProject.projectUserTrips | keyvalue).length | number: '1.0-2'}} km/viaje.
+                        </span>
+                        }@else {
+                        {{ user.userProject.projectKms }} km recorridos.
+                        }
                     </div>
                     }
                 </div>
@@ -139,11 +148,7 @@
                 </div>
             </div>
             <div class="d-flex column-gap-4">
-                <!-- <button type="button" class="btn btn-outline-dark btn-sm" (click)="exportData()">
-                    Exportar datos
-                </button> -->
-                <button type="button" class="btn btn-outline-dark btn-sm" data-bs-toggle="modal"
-                    data-bs-target="#exportModal">
+                <button type="button" class="btn btn-outline-dark btn-sm" (click)="exportData()">
                     Exportar datos
                 </button>
                 @if (currentUserRole === 'admin') {
@@ -161,37 +166,160 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title fw-bold">Calculadora de Gastos</h5>
-                    <h6 class="form-text">Calcula el gasto de gasolina por usuario</h6>
+                    <h5 class="card-title fw-bold">Gestión de Gastos</h5>
+                    <h6 class="form-text">Introduce tickets de gasolina o contrasta los gastos de cada usuario</h6>
+                    <div class="row mx-0 rounded py-1 my-3" style="background-color: #f4f4f5;">
+                        <!-- TODO: Un boton que lo hace todo, con animaciones -->
+                        <!-- <div class="col-6 d-grid px-1">
+                            <button class="btn shadow-sm" id="ticketDesktop" [style.background-color]="'#fff'"
+                                style="--bs-btn-active-border-color: #ffffff00; transition: transform 0.5s ease-in-out;"
+                                [ngStyle]="{ 'transform': ticketActive ? 'translateX(0)' : 'translateX(337.8px)' }"
+                                (click)="!ticketActive ? ticketActive = true : ticketActive = false; calculateCost()">
+                                @if (ticketActive) {
+                                Introducir Ticket
+                                }@else {
+                                Calcular Costes
+                                }
+                            </button>
+                        </div> -->
+                        <div class="col-6 d-grid px-1">
+                            <button class="btn" [class.shadow-sm]="ticketActive" id="ticketDesktop"
+                                [style.background-color]="ticketActive? '#fff' : ''"
+                                style="--bs-btn-active-border-color: #ffffff00;" (click)="ticketActive = true">
+                                Introducir Ticket
+                            </button>
+                            <button class="btn" [class.shadow-sm]="ticketActive" id="ticketMobile"
+                                [style.background-color]="ticketActive? '#fff' : ''"
+                                style="--bs-btn-active-border-color: #ffffff00;" (click)="ticketActive = true">
+                                Ticket
+                            </button>
+                        </div>
+                        <div class="col-6 d-grid px-1">
+                            <button class="btn" [class.shadow-sm]="!ticketActive" id="costesDesktop"
+                                [style.background-color]="!ticketActive? '#fff' : ''"
+                                style="--bs-btn-active-border-color: #ffffff00;"
+                                (click)="ticketActive = false; calculateCost()">
+                                Calcular Costes
+                            </button>
+                            <button class="btn" [class.shadow-sm]="!ticketActive" id="costesMobile"
+                                [style.background-color]="!ticketActive? '#fff' : ''"
+                                style="--bs-btn-active-border-color: #ffffff00;"
+                                (click)="ticketActive = false; calculateCost()">
+                                Costes
+                            </button>
+                        </div>
+                    </div>
+                    @if (ticketActive) {
                     <div class="d-flex friki column-gap-4">
-                        <form class="d-flex flex-column" (ngSubmit)="calculateCost()">
-                            <div class="mb-3">
-                                <label for="totalGasolina" class="form-label">Total de Gasolina Gastada (en €)</label>
-                                <input type="number" class="form-control" id="totalGasolina" [(ngModel)]="totalGasolina"
-                                    name="totalGasolina">
+                        <form class="d-flex flex-column" [formGroup]="ticketForm" (ngSubmit)="onSubmitTicket()"
+                            autocomplete="off">
+                            <!-- [ DEBUG START ]: Para testear la creación de un ticket con un usuario distinto -->
+                            <div class="mb-3" [hidden]="!debugMode">
+                                <label for="logUsuario" class="form-label">Usuario</label>
+                                <select class="form-select form-select-sm" id="logUsuario" formControlName="ticketUserId">
+                                    <option *ngFor="let user of projectUsers" [value]="user.userId">{{
+                                        user.userDisplayName
+                                        }}</option>
+                                </select>
                             </div>
-                            <button type="submit" class="btn btn-dark">Calcular</button>
+                            <!-- [ DEBUG FINAL ] -->
+                            <div class="d-flex justify-content-between column-gap-4">
+                                <div class="mb-3">
+                                    <label for="logFechaTicket" class="form-label">Fecha Repostaje</label>
+                                    <input type="date" class="form-control form-control-sm" id="logFechaTicket"
+                                        formControlName="ticketDate">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="logValorTicket" class="form-label">Valor del Ticket</label>
+                                    <input type="number" class="form-control form-control-sm" id="logValorTicket"
+                                        formControlName="ticketValue">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-dark">Introducir</button>
                         </form>
                         <div style="border-left:1px solid #dee2e6;"></div>
                         <div id="coste-usuario" class="flex-fill">
-                            @if (costPerUser) {
-                            <h6 class="form-text">Coste por Usuario</h6>
+                            <h6 class="form-text">Tickets por Usuario</h6>
                             @for (user of projectUsers; track user.userId) {
                             <div class="d-flex justify-content-between">
                                 <span>{{ user.userDisplayName }}</span>
-                                <span>{{ calculateUserCost(user) | currency: 'EUR' }}</span>
+                                <span>
+                                    {{ user.userProject.projectPayment | currency: 'EUR' }}
+                                    ({{ (user.userProject.projectUserTickets ?? {} | keyvalue).length }}
+                                    {{ (user.userProject.projectUserTickets ?? {} | keyvalue).length === 1 ? 'ticket' :
+                                    'tickets' }})
+                                </span>
                             </div>
-                            }
                             }
                         </div>
                     </div>
+                    }@else {
+                    <div class="d-flex friki column-gap-4 table-responsive">
+                        <table class="table table-hover table-bordered table-sm text-center mb-0 pb-0">
+                            <caption class="text-end mb-0 pb-0" style="font-size: 0.8rem;">
+                                Resultados <span class="text-success">POSITIVOS</span> implican que el usuario ha
+                                pagado <span class="text-success">MÁS</span> de lo que le corresponde. <br> Resultados
+                                <span class="text-danger">NEGATIVOS</span> implican que el usuario ha pagado
+                                <span class="text-danger">MENOS</span> de lo que le corresponde.
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col">Ha pagado</th>
+                                    <th scope="col">Debe pagar</th>
+                                    <th scope="col">Resultado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (user of projectUsers; track user.userId) {
+                                <tr>
+                                    <th scope="row" class="text-center">{{ user.userDisplayName }}</th>
+                                    <td>{{ user.userProject.projectPayment | currency: 'EUR' }}</td>
+                                    <td>{{ calculateUserCost(user) | currency: 'EUR' }}</td>
+                                    @if (user.userProject.projectPayment - calculateUserCost(user) > 0) {
+                                    <td class="text-success">+
+                                        {{ user.userProject.projectPayment - calculateUserCost(user) | currency:
+                                        'EUR'
+                                        }}</td>
+                                    }@else if (user.userProject.projectPayment - calculateUserCost(user) < 0) { <td
+                                        class="text-danger">-
+                                        {{ calculateUserCost(user) - user.userProject.projectPayment | currency:
+                                        'EUR'
+                                        }}</td>
+                                        }@else {
+                                        <td class="text-success">0</td>
+                                        }
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    }
                 </div>
             </div>
         </div>
     </div>
 </div>
 <style>
+    #ticketDesktop,
+    #costesDesktop {
+        display: inline-block;
+    }
+
+    #ticketMobile,
+    #costesMobile {
+        display: none;
+    }
+
+    th {
+        background-color: #f4f4f5;
+    }
+
     @media (max-width: 768px) {
+        .only-desktop {
+            display: none;
+        }
+
         .friki {
             flex-direction: column;
         }
@@ -203,6 +331,16 @@
 
         #coste-usuario {
             margin-top: 16px;
+        }
+
+        #ticketDesktop,
+        #costesDesktop {
+            display: none;
+        }
+
+        #ticketMobile,
+        #costesMobile {
+            display: inline-block;
         }
 
         /* #grafica {
@@ -229,29 +367,6 @@
                 <button type="button" class="btn btn-lg btn-link fs-6 text-decoration-none col-6 py-3 m-0 rounded-0"
                     data-bs-dismiss="modal">
                     No thanks
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content rounded-3 shadow">
-            <div class="modal-header border-bottom-0">
-                <h1 class="modal-title fs-5">Introduce el coste total de gasolina</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body py-0">
-                <div class="mb-3">
-                    <label for="totalGasolinaModal" class="form-label">Total de Gasolina Gastada (en €)</label>
-                    <input type="number" class="form-control" id="totalGasolinaModal" [(ngModel)]="totalGasolina"
-                        name="totalGasolinaModal">
-                </div>
-            </div>
-            <div class="modal-footer flex-column align-items-stretch w-100 gap-2 pb-3 border-top-0">
-                <button type="button" class="btn btn-lg btn-dark" (click)="exportData()" data-bs-dismiss="modal">
-                    Exportar datos
                 </button>
             </div>
         </div>

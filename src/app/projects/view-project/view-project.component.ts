@@ -4,13 +4,14 @@ import { ChartModule } from 'primeng/chart';
 
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MustBePositive, MustBeInRange } from '@app/_helpers';
+import { MustBePositive, MustBeInRange, MustBeSequential } from '@app/_helpers';
 import { TripCreation, TripDTO } from '@app/interfaces/trip.interface';
 import { AlertService } from '@app/services/alert.service';
 import { AuthService } from '@app/services/auth.service';
 import { BackendService } from '@app/services/backend.service';
 import { monthDays } from '@formkit/tempo';
 import { getDatabase, ref } from "firebase/database";
+import { TicketCreation } from '@app/interfaces/ticket';
 
 @Component({
   selector: 'app-view-project',
@@ -25,6 +26,8 @@ export class ViewProjectComponent implements OnInit {
 
   debugMode = false;
 
+  ticketActive = true;
+
   form = new FormGroup({
     // [ DEBUG ]: Para testear la creación de un viaje con un usuario distinto
     tripUserId: new FormControl({ value: '', disabled: !this.debugMode }, Validators.required),
@@ -32,6 +35,13 @@ export class ViewProjectComponent implements OnInit {
     tripStartKm: new FormControl('', Validators.required),
     tripEndKm: new FormControl('', Validators.required),
   }, { validators: [MustBePositive()] });
+
+  ticketForm = new FormGroup({
+    // [ DEBUG ]: Para testear la creación de un viaje con un usuario distinto
+    ticketUserId: new FormControl({ value: '', disabled: !this.debugMode }, Validators.required),
+    ticketDate: new FormControl('', Validators.required),
+    ticketValue: new FormControl('', [Validators.required, Validators.min(0)]),
+  });
 
   textColor = 'rgb(73, 80, 87)';
   textColorSecondary = 'rgb(108, 117, 125)';
@@ -81,7 +91,16 @@ export class ViewProjectComponent implements OnInit {
       this.buildDatasets();
     });
     // añade un validador nuevo (MustBeInRange(this.project)) al formGroup
-    this.form.setValidators([MustBePositive(), MustBeInRange(this.project.projectStartDate, this.project.projectEndDate)]);
+    // (se añade aqui porque se requiere que 'this.project' este inicializado)
+    this.form.addValidators([
+      MustBePositive(),
+      MustBeInRange('tripDate', this.project),
+      MustBeSequential(this.lastTrip?.tripEndKm ?? 0)
+    ])
+
+    this.ticketForm.addValidators([
+      MustBeInRange('ticketDate', this.project),
+    ]);
   }
 
   onSubmit() {
@@ -122,6 +141,42 @@ export class ViewProjectComponent implements OnInit {
       this.buildDatasets();
     }).catch((error) => {
       console.error("Error creating trip", error);
+    });
+  }
+
+  onSubmitTicket() {
+    if (this.ticketForm.invalid) {
+      const controls = this.ticketForm.controls;
+      if (controls.ticketDate.invalid) {
+        this.alertService.error('Fecha inválida');
+      } else if (controls.ticketValue.invalid) {
+        this.alertService.error('Valor del ticket inválido');
+      } else {
+        this.alertService.error('Formulario inválido');
+      }
+      return;
+    }
+
+    // Crear un nuevo viaje
+    const newTicket: TicketCreation = {
+      ticketDate: this.ticketForm.value.ticketDate!,
+      ticketValue: Number(this.ticketForm.value.ticketValue),
+    };
+
+    // [ DEBUG ]: Para testear la creación de un viaje con un usuario distinto
+    if (this.debugMode) {
+      this.currentUserId = this.ticketForm.value.ticketUserId!;
+    }
+    this.backendService.createNewTicket(
+      newTicket, this.currentUserId, this.project
+    ).then(() => {
+      console.debug("Ticket created");
+      this.ticketForm.reset({
+        ticketDate: '',
+        ticketValue: ''
+      });
+    }).catch((error) => {
+      console.error("Error creating ticket", error);
     });
   }
 
@@ -181,6 +236,9 @@ export class ViewProjectComponent implements OnInit {
       this.firstTrip = trips.reduce((earliestTrip, currentTrip) => {
         return new Date(currentTrip.tripDate) <= new Date(earliestTrip.tripDate) ? currentTrip : earliestTrip;
       }, trips[0]);
+
+      // actualiza el validator de la fecha del viaje
+      this.form.addValidators(MustBeSequential(this.lastTrip?.tripEndKm ?? 0));
 
       // Iterador para obtener colores
       const iterator = this.generateColors();
@@ -293,9 +351,23 @@ export class ViewProjectComponent implements OnInit {
   totalGasolina: number = 0;
   costPerUser: { [key: string]: number } = {};
 
+  calculateTotalFuelCost() {
+    return this.projectUsers.reduce((acc, user) => {
+      return acc + (user.userProject.projectPayment ?? 0);
+    }, 0);
+  }
+
   calculateCost() {
-    if (this.totalGasolina <= 0 || this.project.projectTotalKms <= 0) {
-      this.alertService.error('Total de gasolina inválido');
+    this.totalGasolina = this.calculateTotalFuelCost();
+
+    if (!this.totalGasolina || this.totalGasolina == 0) {
+      // No hay gastos en el proyecto
+      this.projectUsers.forEach(user => {
+        this.costPerUser[user.userId] = 0;
+      });
+      return;
+    } else if (this.totalGasolina < 0 || this.project.projectTotalKms <= 0) {
+      this.alertService.error('El costo total de gasolina no puede ser negativo');
       return;
     }
 
@@ -309,14 +381,6 @@ export class ViewProjectComponent implements OnInit {
 
   calculateUserCost(user: any): number {
     return this.costPerUser[user.userId] || 0;
-  }
-
-  calculateUserTotalTrips(user: any): number {
-    if (user.userProject.projectUserTrips) {
-      return Object.keys(user.userProject.projectUserTrips).length;
-    } else {
-      return 0;
-    }
   }
 
   exportData() {
@@ -351,6 +415,8 @@ export class ViewProjectComponent implements OnInit {
     matrix[4][1] = this.lastTrip?.tripEndKm;
     matrix[5][0] = 'Km Totales:';
     matrix[5][1] = this.project.projectTotalKms;
+
+    this.totalGasolina = this.calculateTotalFuelCost();
 
     const costPerKm = this.totalGasolina / this.project.projectTotalKms;
 
