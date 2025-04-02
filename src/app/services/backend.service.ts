@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { ProjectCreation, ProjectDTO, ProjectJoin } from '@app/interfaces/project.interface';
+import { TicketCreation, TicketDTO } from '@app/interfaces/ticket';
 import { TripCreation, TripDTO } from '@app/interfaces/trip.interface';
 import { UserToRegister } from '@app/interfaces/user.interface';
 import { UserCredential } from 'firebase/auth';
@@ -57,6 +58,7 @@ export class BackendService {
       projectEndDate: project.projectEndDate,
       projectDescription: project.projectDescription,
       projectTotalKms: 0,
+      projectTotalPayment: 0,
     };
 
     const updates = {
@@ -64,7 +66,12 @@ export class BackendService {
       [`projects/${newProjectKey}`]: { ...projectDBData, projectUsers: { [userId]: true } },
       // Referencia al proyecto en el usuario (no hay mas de un proyecto por usuario)
       // Kms hechos por el usuario en el proyecto a 0
-      [`users/${userId}/userProject`]: { projectId: newProjectKey, projectKms: 0, projectRole: 'admin' },
+      [`users/${userId}/userProject`]: {
+        projectId: newProjectKey,
+        projectKms: 0,
+        projectPayment: 0,
+        projectRole: 'admin'
+      },
     }
 
     await update(ref(this.database), updates);
@@ -87,6 +94,7 @@ export class BackendService {
         await update(ref(this.database, `users/${uid}/userProject`), {
           projectId: projectJoin.projectId,
           projectRole: 'user',
+          projectPayment: 0,
           projectKms: 0,
         });
         await update(ref(this.database, `projects/${projectJoin.projectId}/projectUsers`), {
@@ -124,6 +132,7 @@ export class BackendService {
 
       updates[`projects/${projectId}`] = null;
       updates[`trips/${projectId}`] = null;
+      updates[`tickets/${projectId}`] = null;
 
       return update(ref(this.database), updates);
     }
@@ -228,6 +237,38 @@ export class BackendService {
     }, {
       onlyOnce: true
     });
+  }
+
+  async createNewTicket(ticket: TicketCreation, uid: string, project: ProjectDTO) {
+    const newTicketKey = push(child(ref(this.database), 'tickets')).key;
+    const userName = (await get(ref(this.database, `users/${uid}/userDisplayName`))).val();
+
+    const ticketDBData: TicketDTO = {
+      ticketId: newTicketKey!,
+      ticketUserId: uid,
+      ticketUserName: userName,
+      ticketDate: ticket.ticketDate,
+      ticketValue: ticket.ticketValue,
+    };
+
+    console.debug("Creating new ticket:", ticketDBData);
+
+    const previousProjectTotalPayment = (await get(ref(this.database, `projects/${project.projectId}/projectTotalPayment`))).val();
+    const userProjectSnapshot = await get(ref(this.database, `users/${uid}/userProject`));
+    const previousAccumValue = userProjectSnapshot.val().projectPayment;
+
+    const updates = {
+      // Nuevo ticket
+      [`tickets/${project.projectId}/${newTicketKey}`]: ticketDBData,
+      // Referencia al ticket en el usuario
+      [`users/${uid}/userProject/projectUserTickets/${newTicketKey}`]: true,
+      [`users/${uid}/userProject/projectPayment`]: previousAccumValue + ticketDBData.ticketValue,
+      // Actualizar los kms totales del proyecto
+      [`projects/${project.projectId}/projectTotalPayment`]: previousProjectTotalPayment + ticketDBData.ticketValue,
+    };
+
+    await update(ref(this.database), updates);
+    return ticketDBData;
   }
 
 }
