@@ -19,4 +19,5 @@ export interface ProjectDTO {
     projectStartDate: string;
     projectEndDate: string;
     projectTotalKms: number;
+    projectTotalPayment: number;
 }
