@@ -1,27 +1,35 @@
-# MileageLog
+# Mileage Tracker
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.7.
+**Mileage Tracker** es un proyecto que surge para dar solución a una situación personal en la que se debe gestionar los gastos de un coche compartido por varias personas. 
 
-## Development server
+El proyecto constituye una aplicación web que permite registrar viajes realizados por varios usuarios, así como los tickets de repostage aportados por cada uno de ellos. De esta manera, se puede llevar un control sencillo de los gastos y el kilometraje recorrido.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+![Página Principal de la Plataforma](.github/screenshots/home-page.png)
 
-## Code scaffolding
+## Funcionalidades
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+La aplicación presenta difrentes características, entre las que se incluyen:
 
-## Build
+- Autenticación de usuarios mediante correo electrónico o Google.
+- Creación de proyectos o posibilidad de unirse a proyectos existentes.
+- Añadir viajes a los proyectos.
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+- Visualización gráfica de los kilometros realizados por dia por cada usuario.
+- Visualización del porcentaje de uso de cada usuario.
+- Registro de tickets de repostaje de gasolina
+- Calculadora de gastos por usuario basada en el kilometraje total y el coste total aportado de gasolina.
+- Posibilidad de exportar los datos de los viajes a un archivo CSV.
 
-## Running unit tests
+![Vista de un Proyecto](.github/screenshots/project-view.png)
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Tecnologías utilizadas
 
-## Running end-to-end tests
+La aplicación ha sido desarrollada utilizando únicamente Angular 19 y Firebase. Para la visualización de los gráficos se ha utilizado un componente de [PrimeNG](https://www.primefaces.org/primeng/), que utiliza [Chart.js](https://www.chartjs.org/) para la generación de los gráficos [^1].
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+De Firebase se han utilizado los siguientes servicios:
 
-## Further help
+- **Authentication:** para la autenticación de los usuarios mediante varios proveedores de acceso.
+- **Realtime Database:** para el almacenamiento de los datos.
+- **Hosting:** para el despliegue de la aplicación.
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+[^1]: Queda pendiente eliminar la dependencia de PrimeNG y utilizar directamente Chart.js para la generación de los gráficos.
