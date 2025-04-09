@@ -21,11 +21,13 @@ export function MustBeSequential(lastTripEndKms: number) {
     //   { 'tripStartKm': tripStartKmValue, 'lastTripEndKms': lastTripEndKms },
     // ])
 
-    // set error on tripStartKm if validation fails
-    if (tripStartKmValue !== lastTripEndKms) {
-      tripStartKm.setErrors({ mustBeSequential: true });
-    } else {
+    // consideramos tambien el caso en que lastTripEndKms es 0:
+    // el proyecto es nuevo y no tiene viajes previos
+    if (lastTripEndKms === 0 || tripStartKmValue === lastTripEndKms) {
       tripStartKm.setErrors(null);
+    // set error on tripStartKm if validation fails
+    } else {
+      tripStartKm.setErrors({ mustBeSequential: true });
     }
 
     return null;
