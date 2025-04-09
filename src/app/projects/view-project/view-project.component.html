@@ -121,7 +121,8 @@
                     <div class="form-text">
                         @if (user.userProject.projectKms !== 0) {
                         {{ user.userProject.projectKms }} km recorridos en
-                        {{ (user.userProject.projectUserTrips | keyvalue).length }} viajes.
+                        {{ (user.userProject.projectUserTrips | keyvalue).length }}
+                        {{ (user.userProject.projectUserTrips | keyvalue).length > 1 ? 'viajes.' : 'viaje.' }}
                         <span class="only-desktop">
                             Una media de
                             {{ user.userProject.projectKms / (user.userProject.projectUserTrips | keyvalue).length | number: '1.0-2'}} km/viaje.
