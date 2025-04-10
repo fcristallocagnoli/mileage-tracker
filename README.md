@@ -2,19 +2,19 @@
 
 **Mileage Tracker** es un proyecto que surge para dar solución a una situación personal en la que se debe gestionar los gastos de un coche compartido por varias personas. 
 
-El proyecto constituye una aplicación web que permite registrar viajes realizados por varios usuarios, así como los tickets de repostage aportados por cada uno de ellos. De esta manera, se puede llevar un control sencillo de los gastos y el kilometraje recorrido.
+El proyecto constituye una aplicación web que permite registrar viajes realizados por varios usuarios, así como los tickets de repostaje aportados por cada uno de ellos. De esta manera, se puede llevar un control sencillo de los gastos y el kilometraje recorrido.
 
 ![Página Principal de la Plataforma](.github/screenshots/home-page.png)
 
 ## Funcionalidades
 
-La aplicación presenta difrentes características, entre las que se incluyen:
+La aplicación presenta diferentes características, entre las que se incluyen:
 
 - Autenticación de usuarios mediante correo electrónico o Google.
 - Creación de proyectos o posibilidad de unirse a proyectos existentes.
 - Añadir viajes a los proyectos.
 
-- Visualización gráfica de los kilometros realizados por dia por cada usuario.
+- Visualización gráfica de los kilómetros realizados por dia por cada usuario.
 - Visualización del porcentaje de uso de cada usuario.
 - Registro de tickets de repostaje de gasolina
 - Calculadora de gastos por usuario basada en el kilometraje total y el coste total aportado de gasolina.
