@@ -13,10 +13,20 @@
                                 (click)="copyToClipboard(project.projectId, 'projectID')">
                                 @if (!isCopied['projectID']) {
                                 <i class="fa-regular fa-copy pe-1"></i>
-                                Copiar ID
+                                <span class="only-desktop">
+                                    Copiar ID
+                                </span>
+                                <span class="only-mobile">
+                                    ID
+                                </span>
                                 }@else {
                                 <i class="fa-solid fa-check pe-1"></i>
-                                ID Copiado!
+                                <span class="only-desktop">
+                                    ID Copiado!
+                                </span>
+                                <span class="only-mobile">
+                                    ID
+                                </span>
                                 }
                             </button>
                         </h5>
@@ -31,9 +41,15 @@
                             <button class="btn btn-sm btn-dark ms-3" [disabled]="!lastTrip"
                                 (click)="copyToClipboard(lastTrip?.tripEndKm, 'lastKms')">
                                 @if (!isCopied['lastKms']) {
-                                <i class="fa-regular fa-copy"></i>
+                                <i class="fa-regular fa-copy pe-1"></i>
+                                <span class="only-mobile">
+                                    Km
+                                </span>
                                 }@else {
-                                <i class="fa-solid fa-check"></i>
+                                <i class="fa-solid fa-check pe-1"></i>
+                                <span class="only-mobile">
+                                    Km
+                                </span>
                                 }
                             </button>
                         </h5>
@@ -89,12 +105,12 @@
                         </div>
                         <div class="mb-3">
                             <label for="logKmIniciales" class="form-label">Kilometros Iniciales</label>
-                            <input type="text" class="form-control" id="logKmIniciales" formControlName="tripStartKm"
+                            <input type="number" class="form-control" id="logKmIniciales" formControlName="tripStartKm"
                                 [placeholder]="getLastKms()">
                         </div>
                         <div class="mb-3">
                             <label for="logKmFinales" class="form-label">Kilometros Finales</label>
-                            <input type="text" class="form-control" id="logKmFinales" formControlName="tripEndKm">
+                            <input type="number" class="form-control" id="logKmFinales" formControlName="tripEndKm">
                         </div>
                         <button type="submit" class="btn btn-dark">
                             Introducir
@@ -125,7 +141,8 @@
                         {{ (user.userProject.projectUserTrips | keyvalue).length > 1 ? 'viajes.' : 'viaje.' }}
                         <span class="only-desktop">
                             Una media de
-                            {{ user.userProject.projectKms / (user.userProject.projectUserTrips | keyvalue).length | number: '1.0-2'}} km/viaje.
+                            {{ user.userProject.projectKms / (user.userProject.projectUserTrips | keyvalue).length |
+                            number: '1.0-2'}} km/viaje.
                         </span>
                         }@else {
                         {{ user.userProject.projectKms }} km recorridos.
@@ -184,29 +201,28 @@
                             </button>
                         </div> -->
                         <div class="col-6 d-grid px-1">
-                            <button class="btn" [class.shadow-sm]="ticketActive" id="ticketDesktop"
+                            <button class="btn" [class.shadow-sm]="ticketActive"
                                 [style.background-color]="ticketActive? '#fff' : ''"
                                 style="--bs-btn-active-border-color: #ffffff00;" (click)="ticketActive = true">
-                                Introducir Ticket
-                            </button>
-                            <button class="btn" [class.shadow-sm]="ticketActive" id="ticketMobile"
-                                [style.background-color]="ticketActive? '#fff' : ''"
-                                style="--bs-btn-active-border-color: #ffffff00;" (click)="ticketActive = true">
-                                Ticket
+                                <span class="only-desktop">
+                                    Introducir Ticket
+                                </span>
+                                <span class="only-mobile">
+                                    Ticket
+                                </span>
                             </button>
                         </div>
                         <div class="col-6 d-grid px-1">
-                            <button class="btn" [class.shadow-sm]="!ticketActive" id="costesDesktop"
+                            <button class="btn" [class.shadow-sm]="!ticketActive"
                                 [style.background-color]="!ticketActive? '#fff' : ''"
                                 style="--bs-btn-active-border-color: #ffffff00;"
                                 (click)="ticketActive = false; calculateCost()">
-                                Calcular Costes
-                            </button>
-                            <button class="btn" [class.shadow-sm]="!ticketActive" id="costesMobile"
-                                [style.background-color]="!ticketActive? '#fff' : ''"
-                                style="--bs-btn-active-border-color: #ffffff00;"
-                                (click)="ticketActive = false; calculateCost()">
-                                Costes
+                                <span class="only-desktop">
+                                    Calcular Costes
+                                </span>
+                                <span class="only-mobile">
+                                    Costes
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -217,21 +233,22 @@
                             <!-- [ DEBUG START ]: Para testear la creación de un ticket con un usuario distinto -->
                             <div class="mb-3" [hidden]="!debugMode">
                                 <label for="logUsuario" class="form-label">Usuario</label>
-                                <select class="form-select form-select-sm" id="logUsuario" formControlName="ticketUserId">
+                                <select class="form-select form-select-sm" id="logUsuario"
+                                    formControlName="ticketUserId">
                                     <option *ngFor="let user of projectUsers" [value]="user.userId">{{
                                         user.userDisplayName
                                         }}</option>
                                 </select>
                             </div>
                             <!-- [ DEBUG FINAL ] -->
-                            <div class="d-flex justify-content-between column-gap-4">
+                            <div class="d-flex justify-content-between column-gap-3">
                                 <div class="mb-3">
-                                    <label for="logFechaTicket" class="form-label">Fecha Repostaje</label>
+                                    <label for="logFechaTicket" class="form-label">Fecha</label>
                                     <input type="date" class="form-control form-control-sm" id="logFechaTicket"
                                         formControlName="ticketDate">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="logValorTicket" class="form-label">Valor del Ticket</label>
+                                    <label for="logValorTicket" class="form-label">Ticket (€)</label>
                                     <input type="number" class="form-control form-control-sm" id="logValorTicket"
                                         formControlName="ticketValue">
                                 </div>
@@ -302,23 +319,21 @@
     </div>
 </div>
 <style>
-    #ticketDesktop,
-    #costesDesktop {
-        display: inline-block;
-    }
-
-    #ticketMobile,
-    #costesMobile {
-        display: none;
-    }
-
     th {
         background-color: #f4f4f5;
+    }
+
+    .only-mobile {
+        display: none;
     }
 
     @media (max-width: 768px) {
         .only-desktop {
             display: none;
+        }
+
+        .only-mobile {
+            display: inline-block;
         }
 
         .friki {
@@ -332,16 +347,6 @@
 
         #coste-usuario {
             margin-top: 16px;
-        }
-
-        #ticketDesktop,
-        #costesDesktop {
-            display: none;
-        }
-
-        #ticketMobile,
-        #costesMobile {
-            display: inline-block;
         }
 
         /* #grafica {
