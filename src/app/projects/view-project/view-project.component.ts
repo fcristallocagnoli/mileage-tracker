@@ -40,7 +40,7 @@ export class ViewProjectComponent implements OnInit {
     // [ DEBUG ]: Para testear la creación de un viaje con un usuario distinto
     ticketUserId: new FormControl({ value: '', disabled: !this.debugMode }, Validators.required),
     ticketDate: new FormControl('', Validators.required),
-    ticketValue: new FormControl('', [Validators.required, Validators.min(0)]),
+    ticketValue: new FormControl('', [Validators.required, Validators.min(1)]),
   });
 
   textColor = 'rgb(73, 80, 87)';
@@ -103,15 +103,34 @@ export class ViewProjectComponent implements OnInit {
     ]);
   }
 
+  refreshProjectUsers() {
+    this.backendService.getProjectUsers(this.project.projectId, (users) => {
+      // Obtenemos los usuarios del proyecto y los ordenamos por kilómetros recorridos
+      this.projectUsers = users.sort((a, b) => b.userProject.projectKms - a.userProject.projectKms);
+    });
+  }
+
   onSubmit() {
     if (this.form.invalid) {
       const controls = this.form.controls;
       if (controls.tripDate.invalid) {
-        this.alertService.error('Fecha inválida');
+        if (controls.tripDate.errors?.['required']) {
+          this.alertService.error('Fecha inválida<br>El campo es obligatorio');
+        } else if (controls.tripDate.errors?.['mustBeInRange']) {
+          this.alertService.error('Fecha inválida<br>Rango: ' + this.project.projectStartDate + ' a ' + this.project.projectEndDate);
+        }
       } else if (controls.tripStartKm.invalid) {
-        this.alertService.error('Kilómetros iniciales inválidos');
+        if (controls.tripStartKm.errors?.['required']) {
+          this.alertService.error('Km iniciales inválidos<br>El campo es obligatorio');
+        } else if (controls.tripStartKm.errors?.['mustBeSequential']) {
+          this.alertService.error('Km iniciales inválidos<br> Deben ser iguales a los km finales del último viaje');
+        }
       } else if (controls.tripEndKm.invalid) {
-        this.alertService.error('Kilómetros finales inválidos');
+        if (controls.tripEndKm.errors?.['required']) {
+          this.alertService.error('Kms finales inválidos<br> El campo es obligatorio');
+        } else if (controls.tripEndKm.errors?.['mustBePositive']) {
+          this.alertService.error('Kms finales inválidos<br> Ha de ser mayor que los kms iniciales');
+        }
       } else {
         this.alertService.error('Formulario inválido');
       }
@@ -133,12 +152,14 @@ export class ViewProjectComponent implements OnInit {
       newTrip, this.currentUserId, this.project
     ).then(() => {
       console.debug("Trip created");
+      this.alertService.success('Viaje creado correctamente');
       this.form.reset({
         tripDate: '',
         tripStartKm: '',
         tripEndKm: ''
       });
       this.buildDatasets();
+      this.refreshProjectUsers();
     }).catch((error) => {
       console.error("Error creating trip", error);
     });
@@ -148,9 +169,17 @@ export class ViewProjectComponent implements OnInit {
     if (this.ticketForm.invalid) {
       const controls = this.ticketForm.controls;
       if (controls.ticketDate.invalid) {
-        this.alertService.error('Fecha inválida');
+        if (controls.ticketDate.errors?.['required']) {
+          this.alertService.error('Fecha inválida<br>El campo es obligatorio');
+        } else if (controls.ticketDate.errors?.['mustBeInRange']) {
+          this.alertService.error('Fecha inválida<br>Rango: ' + this.project.projectStartDate + ' a ' + this.project.projectEndDate);
+        }
       } else if (controls.ticketValue.invalid) {
-        this.alertService.error('Valor del ticket inválido');
+        if (controls.ticketValue.errors?.['required']) {
+          this.alertService.error('Valor del ticket inválido<br>El campo es obligatorio');
+        } else if (controls.ticketValue.errors?.['min']) {
+          this.alertService.error('Valor del ticket inválido<br>El valor ha de ser mayor que 0');
+        }
       } else {
         this.alertService.error('Formulario inválido');
       }
@@ -171,10 +200,12 @@ export class ViewProjectComponent implements OnInit {
       newTicket, this.currentUserId, this.project
     ).then(() => {
       console.debug("Ticket created");
+      this.alertService.success('Ticket creado correctamente');
       this.ticketForm.reset({
         ticketDate: '',
         ticketValue: ''
       });
+      this.refreshProjectUsers();
     }).catch((error) => {
       console.error("Error creating ticket", error);
     });
