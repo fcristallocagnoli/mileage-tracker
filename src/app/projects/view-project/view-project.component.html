@@ -242,12 +242,12 @@
                             </div>
                             <!-- [ DEBUG FINAL ] -->
                             <div class="d-flex justify-content-between column-gap-3">
-                                <div class="mb-3">
+                                <div class="mb-3 flex-grow-1">
                                     <label for="logFechaTicket" class="form-label">Fecha</label>
                                     <input type="date" class="form-control form-control-sm" id="logFechaTicket"
                                         formControlName="ticketDate">
                                 </div>
-                                <div class="mb-3">
+                                <div class="mb-3 flex-grow-1">
                                     <label for="logValorTicket" class="form-label">Ticket (€)</label>
                                     <input type="number" class="form-control form-control-sm" id="logValorTicket"
                                         formControlName="ticketValue">
@@ -255,7 +255,7 @@
                             </div>
                             <button type="submit" class="btn btn-dark">Introducir</button>
                         </form>
-                        <div style="border-left:1px solid #dee2e6;"></div>
+                        <div class="only-desktop" style="border-left:1px solid #dee2e6;"></div>
                         <div id="coste-usuario" class="flex-fill">
                             <h6 class="form-text">Tickets por Usuario</h6>
                             @for (user of projectUsers; track user.userId) {
@@ -327,6 +327,15 @@
         display: none;
     }
 
+    @media (max-width: 992px) {
+        .friki {
+            flex-direction: column;
+        }
+        
+        #coste-usuario {
+            margin-top: 16px;
+        }
+    }
     @media (max-width: 768px) {
         .only-desktop {
             display: none;
@@ -336,17 +345,9 @@
             display: inline-block;
         }
 
-        .friki {
-            flex-direction: column;
-        }
-
         #friki {
             flex-direction: column;
             flex-flow: column-reverse;
-        }
-
-        #coste-usuario {
-            margin-top: 16px;
         }
 
         /* #grafica {
